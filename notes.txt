@@ -1,0 +1,7 @@
+Runtime dependencies
+====================
+ python 2.7
+ google-api-python-client
+	- httplib2
+	- python-gflags
+pyopenssl

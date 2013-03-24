@@ -1,46 +1,62 @@
 #!/usr/bin/env python
 
+# Downloads a file list
+
+import argparse
 import httplib2
 import pprint
+import json
+import logging
 
 from apiclient.discovery import build
-from apiclient.http import MediaFileUpload
-from oauth2client.client import OAuth2WebServerFlow
+from oauth2client.client import SignedJwtAssertionCredentials
 
-
-# Copy your credentials from the APIs Console
-CLIENT_ID = '528303764723-e2al2amkoj799guouikid9om3rrntain.apps.googleusercontent.com'
-CLIENT_SECRET = 'T-ha8fP3MCSRU7acWfBydMGN'
-
-# Check https://developers.google.com/drive/scopes for all available scopes
+DEFAULT_CONFIG_FILE = './etc/config.json'
 OAUTH_SCOPE = 'https://www.googleapis.com/auth/drive'
 
-# Redirect URI for installed apps
-REDIRECT_URI = 'urn:ietf:wg:oauth:2.0:oob'
 
-# Path to the file to upload
-FILENAME = 'document.txt'
+# loads the JSON configuration file
+def load_configuration( config_path ):
+    with open( config_path, 'rt') as fp:
+        return json.load(fp)
 
-# Run through the OAuth flow and retrieve credentials
-flow = OAuth2WebServerFlow(CLIENT_ID, CLIENT_SECRET, OAUTH_SCOPE, REDIRECT_URI)
-authorize_url = flow.step1_get_authorize_url()
-print 'Go to the following link in your browser: ' + authorize_url
-code = raw_input('Enter verification code: ').strip()
-credentials = flow.step2_exchange(code)
+# loads the API client credentials
+def load_credentials( config ):
+    with open( config['credentials']['account']['private_key']['path'], 'rb' ) as fp:
+        private_key = fp.read()
+    
+    return SignedJwtAssertionCredentials(service_account_name=config['credentials']['account']['email'],
+                                          private_key=private_key,
+                                          scope=OAUTH_SCOPE,
+                                          private_key_password=config['credentials']['account']['private_key']['password'])
 
-# Create an httplib2.Http object and authorize it with our credentials
-http = httplib2.Http()
-http = credentials.authorize(http)
 
-drive_service = build('drive', 'v2', http=http)
+# ... Main program ...
+if __name__ == '__main__':
 
-# Insert a file
-media_body = MediaFileUpload(FILENAME, mimetype='text/plain', resumable=True)
-body = {
-  'title': 'My document',
-  'description': 'A test document',
-  'mimeType': 'text/plain'
-}
-
-uploaded_file = drive_service.files().insert(body=body, media_body=media_body).execute()
-pprint.pprint(uploaded_file)
+    # load the configuration
+    parser = argparse.ArgumentParser(description='Download all Google docs')
+    parser.add_argument('-c', '--config', dest='configuration_file', action='store', 
+                        metavar='CFG_FILE', default=DEFAULT_CONFIG_FILE,
+                        help='Path to configuration file')
+    parser.add_argument('--log', dest='logging_level', action='store',
+                        metavar='LOGLEVEL', default='WARN',
+                        help='Set the logging level')
+    options = parser.parse_args()
+    config = load_configuration( options.configuration_file )
+    
+    # set up logging
+    logging.basicConfig(level=getattr(logging, options.logging_level))
+    logging.getLogger('oauth2client.util').addHandler(logging.StreamHandler())
+    
+    # load the credentials
+    credentials = load_credentials(config)
+    
+    # create an authorized REST client
+    http = httplib2.Http()
+    http = credentials.authorize(http)
+    drive_service = build('drive', 'v2', http=http)
+    
+    # list all files
+    list_results = drive_service.files().list().execute()
+    pprint.pprint(list_results)
