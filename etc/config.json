@@ -1,24 +1,14 @@
 {
 	"credentials" : 
 	{
-		"type" : "service account",
+		"store" :
+		{
+			"path" : "var/credentials.store"
+		},
 		"account" : 
 		{
-			"email" : "528303764723-t8fkualjbf1kfuqjj5bfnh2q9gd4gjdd@developer.gserviceaccount.com",
-			"private_key" : 
-			{
-				"path" : "etc/c6b75747a34eaf304261b2bc66a60629979c1f99-privatekey.p12",
-				"password" : "notasecret"
-			}
+			"client_id" : "528303764723-o89htckqfcbcbuj2qmm6s2d6i1gufd48.apps.googleusercontent.com",
+			"client_secret" : "aDX6763dgqFCT8yloeMuGyO-" 
 		} 
-	},
-	"web":
-	{
-		"auth_uri": "https://accounts.google.com/o/oauth2/auth",
-		"token_uri":"https://accounts.google.com/o/oauth2/token",
-		"client_email":"528303764723-t8fkualjbf1kfuqjj5bfnh2q9gd4gjdd@developer.gserviceaccount.com",
-		"client_x509_cert_url":"https://www.googleapis.com/robot/v1/metadata/x509/528303764723-t8fkualjbf1kfuqjj5bfnh2q9gd4gjdd@developer.gserviceaccount.com",
-		"client_id":"528303764723-t8fkualjbf1kfuqjj5bfnh2q9gd4gjdd.apps.googleusercontent.com",
-		"auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs"
 	}
 }

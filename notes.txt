@@ -2,6 +2,9 @@ Runtime dependencies
 ====================
  python 2.7
  google-api-python-client
-	- httplib2
-	- python-gflags
-pyopenssl
+
+This link provides a good sample of how to download all files:
+
+http://code.ohloh.net/file?fid=SK2btm6n9NOjz0W6jvJai6eJrBk&cid=PnTI5zjJDLg&s=SignedJwtAssertionCredentials%20google%20drive&mp=1&ml=1&me=1&md=1&browser=Default#L45
+
+ 
