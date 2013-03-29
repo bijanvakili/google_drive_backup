@@ -4,7 +4,6 @@
 
 import argparse
 import httplib2
-import pprint
 import json
 import logging
 import sys
@@ -12,6 +11,8 @@ import sys
 from apiclient.discovery import build
 
 from auth.credential import CredentialManager
+from backup.google_drive import GoogleDriveDownload 
+from backup.storage import Storage
 
 DEFAULT_CONFIG_FILE = './etc/config.json'
 OAUTH_SCOPE = 'https://www.googleapis.com/auth/drive'
@@ -81,9 +82,11 @@ def main():
         http = credentials.authorize(http)
         drive_service = build('drive', 'v2', http=http)
         
-        # list all files
-        list_results = drive_service.files().list().execute()
-        pprint.pprint(list_results)
+        # print out the folder hierarchy
+        drive_download = GoogleDriveDownload(config, drive_service)
+        (all_folders, folder_hierarchy) = drive_download.get_folder_hierarchy()
+        storage = Storage(config, all_folders, folder_hierarchy)
+        storage.output_folders() 
         
     except Exception as e:
         print >>sys.stderr, e
