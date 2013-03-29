@@ -4,9 +4,9 @@ class Storage:
     """
     Stores the backup data
     """
-    def __init__(self, config, all_items, folder_hierarchy):
+    def __init__(self, config, all_folders, folder_hierarchy):
         self._config = config
-        self._all_items = all_items
+        self._all_folders = all_folders
         self._hierarchy = folder_hierarchy
         
     def output_folders(self):
