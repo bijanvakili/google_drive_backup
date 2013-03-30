@@ -37,6 +37,10 @@
 				"content_type" : "application/vnd.openxmlformats-officedocument.presentationml.presentation",
 				"extension" : "pptx"
 			} 
-		}
+		},
+		"exclusions" :
+		[
+			"readings/*"
+		]
 	}
 }

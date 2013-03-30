@@ -1,11 +1,20 @@
 #!/usr/bin/env python
 
-# Downloads a file list
+"""
+Downloads your Google drive for backup
+"""
+# TODO email on error
+# TODO handle modification time (or override to download all)
+# TODO logging configuration
+# TODO cron job
+# TODO makefile and packaging
 
 import argparse
 import httplib2
 import json
 import logging
+import os
+import re
 import sys
 
 from apiclient.discovery import build
@@ -83,6 +92,20 @@ def main():
         # load the credentials
         credentials = credential_manager.load_client_credentials(config['credentials']['account']['client_id'])
         
+        # compile the exclusion list and evaluator
+        exclusions = []
+        for exclusion_str in config['backup']['exclusions']:
+            exclusions.append(re.compile(exclusion_str))
+            
+        def is_excluded_file(pathname):
+            """
+            Predicate to determine if a file should be excluded
+            """
+            for exclusion in exclusions:
+                if exclusion.search(pathname):
+                    return True
+            return False
+        
         # create an authorized REST client
         http = httplib2.Http()
         http = credentials.authorize(http)
@@ -95,10 +118,22 @@ def main():
         storage.prepare_storage() 
         
         # download all the files
-        for curr_folder in all_folders.iterkeys():
-            folder_path = storage.get_target_subfolder(curr_folder)
-            for curr_file in drive_download.iterfolder(curr_folder):
-                drive_download.download_file(curr_file, folder_path)
+        local_root_folder = storage.get_root_folder()
+        for curr_folder_id in all_folders.iterkeys():
+            relative_folder_path = drive_download.get_relative_folder_path(curr_folder_id, all_folders)
+            for curr_file in drive_download.iterfolder(curr_folder_id):
+                
+                # determine if the current file should be skipped due to 
+                # configured exclusions
+                relative_pathname = os.path.sep.join(
+                    [ relative_folder_path, 
+                     drive_download.get_filename(curr_file)])
+                if is_excluded_file(relative_pathname):
+                    logger.info('Excluding {0}'.format(relative_pathname))
+                    continue
+                
+                abs_pathname = os.path.sep.join( [local_root_folder, relative_pathname] )
+                drive_download.download_file(curr_file, abs_pathname)
         
     except Exception as e:
         if logger:

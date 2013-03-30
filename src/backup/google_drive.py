@@ -99,7 +99,29 @@ class GoogleDriveDownload:
                                 u'parent' : None }
         return (all_folders, folder_hierarchy)
     
-    def download_file(self, file_obj, local_download_path):
+    def get_relative_folder_path(self, folder_id, all_folders):
+        """
+        Returns a relative folder path
+        """
+        if folder_id == u'root':
+            return ''
+        
+        folder = all_folders[folder_id]
+        parent_path_components = [folder[u'name']]
+        curr_parent_id = folder[u'parent']
+        while curr_parent_id != u'root':
+            parent_path_components.insert( 0, all_folders[curr_parent_id][u'name'])
+            curr_parent_id = all_folders[curr_parent_id][u'parent']
+        return os.path.sep.join(parent_path_components)
+    
+    def get_filename(self, file_obj):
+        """
+        Determines the local filename for a file object
+        """
+        file_format = self._config['download_formats'][file_obj[u'mimeType']]
+        return '{0}.{1}'.format(file_obj[u'title'], file_format['extension'])
+        
+    def download_file(self, file_obj, filename):
         """
         Downloads a drive file in a preferred format
         
@@ -109,10 +131,6 @@ class GoogleDriveDownload:
         
         # prepare the file metadata
         file_format = self._config['download_formats'][file_obj[u'mimeType']]
-        filename = '{0}{1}{2}.{3}'.format(local_download_path,
-                                          os.path.sep,
-                                          file_obj[u'title'],
-                                          file_format['extension'])
         modification_time = datetime.strptime(file_obj[u'modifiedDate'],
                                           '%Y-%m-%dT%H:%M:%S.%fZ')
         

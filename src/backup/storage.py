@@ -47,18 +47,8 @@ class Storage:
         self._create_folder_hierarchy(self._hierarchy[u'root'], 
                                       self._root_folder)
 
-    def get_target_subfolder(self, folder_id):
+    def get_root_folder(self):
         """
         Returns the storage path for a drive folder
         """
-        if folder_id == u'root':
-            return self._root_folder
-        
-        folder = self._all_folders[folder_id]
-        parent_path_components = [folder[u'name']]
-        curr_parent_id = folder[u'parent']
-        while curr_parent_id != u'root':
-            parent_path_components.insert( 0, self._all_folders[curr_parent_id][u'name'])
-            curr_parent_id = self._all_folders[curr_parent_id][u'parent']
-        parent_path_components.insert( 0, self._root_folder)
-        return os.path.sep.join(parent_path_components)
+        return self._root_folder
