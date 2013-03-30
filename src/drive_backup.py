@@ -53,16 +53,22 @@ def main():
         parser.add_argument('--log', dest='logging_level', action='store',
                             metavar='LOGLEVEL', default='WARN',
                             help='Set the logging level')
-        parser.add_argument('-u', '--user-credentials', dest='cache_credentials', action='store_true',
+        parser.add_argument('-u', '--user-credentials', dest='cache_credentials', 
+                            action='store_true', default=False,
                             help="Cache the user's credentials")
+        parser.add_argument('--dry-run', dest='dry_run', action='store_true',
+                            help='Simulated Output only')
         options = parser.parse_args()
-
+            
         # set up logging
         logging.basicConfig(level=getattr(logging, options.logging_level))
         logging.getLogger('oauth2client.util').addHandler(logging.StreamHandler())
+        logger = logging.getLogger('drive_backup')
+        logger.addHandler(logging.StreamHandler())
 
         # load the configuration and credential manager
         config = load_configuration( options.configuration_file )
+        config['dry_run'] = options.dry_run
         credential_manager = CredentialManager(config['credentials']['store']['path'])
         
         # interactively cache the user's credentials if necessary
@@ -82,14 +88,23 @@ def main():
         http = credentials.authorize(http)
         drive_service = build('drive', 'v2', http=http)
         
-        # print out the folder hierarchy
+        # prepare the storage hierarchy
         drive_download = GoogleDriveDownload(config, drive_service)
         (all_folders, folder_hierarchy) = drive_download.get_folder_hierarchy()
         storage = Storage(config, all_folders, folder_hierarchy)
-        storage.output_folders() 
+        storage.prepare_storage() 
+        
+        # download all the files
+        for curr_folder in all_folders.iterkeys():
+            folder_path = storage.get_target_subfolder(curr_folder)
+            for curr_file in drive_download.iterfolder(curr_folder):
+                drive_download.download_file(curr_file, folder_path)
         
     except Exception as e:
-        print >>sys.stderr, e
+        if logger:
+            logger.error(e)
+        else:
+            print >>sys.stderr, e
         sys.exit(1)
 
 if __name__ == '__main__':

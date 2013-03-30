@@ -13,6 +13,30 @@
 	},
 	"backup" :
 	{
-		"include_trashed" : "false"
+		"include_trashed" : "false",
+		"storage_path" : "./var/download",
+		"download_formats" : 
+		{
+			"application/vnd.google-apps.document": 
+			{
+				"content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+				"extension" : "docx"
+			},
+			"application/vnd.google-apps.spreadsheet" : 
+			{
+				"content_type" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+				"extension" : "xlsx"
+			},
+			"application/vnd.google-apps.drawing" :
+			{
+				"content_type" : "image/svg+xml",
+				"extension" : "svg"
+			},
+			"application/vnd.google-apps.presentation" :
+			{
+				"content_type" : "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+				"extension" : "pptx"
+			} 
+		}
 	}
 }
