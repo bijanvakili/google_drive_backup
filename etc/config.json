@@ -14,7 +14,7 @@
 	"backup" :
 	{
 		"include_trashed" : "false",
-		"storage_path" : "./var/download",
+		"storage_path" : "var/download",
 		"download_formats" : 
 		{
 			"application/vnd.google-apps.document": 
@@ -66,5 +66,77 @@
 				}
 			}
 		}
+	},
+	"logging" : 
+	{
+    	"version": 1,
+	    "formatters": 
+	    {
+	        "verbose": 
+	        {
+	            "format": "%(asctime)s module=%(module)s %(levelname)s:  %(message)s"
+	        },
+	        "message_only": 
+	        {
+	            "format": "%(message)s"
+	        },
+	        "level_and_message" :
+	        {
+	            "format": "%(levelname)s %(message)s"
+	        }
+	    },
+	    "filters" : 
+	    {
+	        "info_and_lower" : 
+	        {
+	            "()": "drive_backup.LevelBelowFilter",
+	            "max_level" : "INFO"
+	        }
+	    },
+	    "handlers" : 
+	    {
+	        "file" : 
+	        {
+	            "level": "INFO",
+	            "class": "logging.handlers.TimedRotatingFileHandler",
+	            "formatter": "verbose",
+	            "filename": "var/log/google_drive_backup.log",
+	            "when": "D",
+	            "backupCount": "7"       
+	        },
+	        "console_stdout" : 
+	        {
+	            "level": "DEBUG",
+	            "class": "logging.StreamHandler",
+	            "filters": ["info_and_lower"],
+	            "formatter": "message_only",
+	            "stream" : "ext://sys.stdout"
+	        },
+	        "console_stderr" : 
+	        {
+	            "level": "WARNING",
+	            "class": "logging.StreamHandler",
+	            "formatter": "level_and_message",
+	            "stream"  : "ext://sys.stderr"
+	        },
+	        "null": 
+	        {
+	            "level": "DEBUG",
+	            "class": "logging.NullHandler"
+	        }                  
+	    },
+		"loggers" :
+		{
+			"drive_backup" :
+			{
+	            "handlers" : [ "file", "console_stdout", "console_stderr" ],
+	            "level": "INFO"
+			},
+			"oauth2client.util" :
+			{
+	            "handlers" : [ "file", "console_stdout", "console_stderr" ],
+	            "level": "DEBUG"
+			}
+		}		
 	}
 }

@@ -60,8 +60,6 @@ class GoogleDriveDownload:
         
         # retrieve the flat list of all folders and filter for only
         # the salient hierarchical link information
-        self._logger.info('Retrieving folder hierarchy...')
-        
         all_folders = {}
         keep_downloading = True
         page_token = None

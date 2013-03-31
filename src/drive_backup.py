@@ -3,12 +3,13 @@
 """
 Downloads your Google drive for backup
 """
-# TODO logging configuration
+# TODO try to replace notification module with logging SMTPHandler
 
 import argparse
 import httplib2
 import json
 import logging
+from logging.config import dictConfig
 import os
 import re
 import sys
@@ -20,6 +21,17 @@ from auth.credential import CredentialManager
 from backup.google_drive import GoogleDriveDownload 
 from backup.storage import Storage
 from notification import EmailNotifier
+
+class LevelBelowFilter(logging.Filter):
+    """
+    Logging filter class to include all messages below a certain level
+    """
+    def __init__(self, max_level):
+        self.max_level = max_level
+        
+    def filter(self, record):
+        return record.levelno <= self.max_level
+
 
 class MainProgram:
     """
@@ -48,8 +60,8 @@ class MainProgram:
         parser.add_argument('-c', '--config', dest='configuration_file', action='store', 
                             metavar='CONFIG', default=self._DEFAULT_CONFIG_FILE,
                             help='Path to configuration file (CONFIG)')
-        parser.add_argument('--log-level', dest='logging_level', action='store',
-                            metavar='LOGLEVEL', default='WARNING',
+        parser.add_argument('--debug', dest='debug', 
+                            action='store_true', default=False,
                             help='Set the logging level')
         parser.add_argument('--remove-creds', dest='remove_credentials', 
                             action='store_true', default=False,
@@ -61,17 +73,19 @@ class MainProgram:
                             help="Ignore the modification time and overwrite everything")
         self._options = parser.parse_args(args=args)
         
-        # set up logging
-        logging.basicConfig(level=getattr(logging, self._options.logging_level))
-        logging.getLogger('oauth2client.util').addHandler(logging.StreamHandler())
-        self._logger = logging.getLogger('drive_backup')
-        self._logger.addHandler(logging.StreamHandler())
-
-        # load the configuration and credential manager
+        # load the configuration
         self._load_configuration( self._options.configuration_file )
+
+        # set up logging and credential manager
+        dictConfig(self._config[u'logging'])
+        self._logger = logging.getLogger('drive_backup')
+        if self._options.debug:
+            self._logger.setLevel(logging.DEBUG)
+        
+        self._logger.debug('Loading credential manager')
         self._credential_manager = CredentialManager(self._config[u'credentials'][u'store'][u'path'],
                                                      self._options.dry_run)
-        
+
     def run(self):
         """
         Runs the selected command
@@ -121,6 +135,8 @@ class MainProgram:
         Downloads the files
         """
         
+        self._logger.info('Checking Google Drive')
+        
         # load the credentials
         credentials = self._credential_manager.load_client_credentials(
             self._config[u'credentials'][u'account'][u'client_id'])
@@ -148,6 +164,7 @@ class MainProgram:
         drive_download = GoogleDriveDownload(self._config, 
                                              drive_service, 
                                              self._options.dry_run)
+        self._logger.debug('Retrieving folder hierarchy...')
         (all_folders, folder_hierarchy) = drive_download.get_folder_hierarchy()
         storage = Storage(self._config, self._options.dry_run)
         if not self._options.dry_run:
@@ -165,16 +182,17 @@ class MainProgram:
                     [ relative_folder_path, 
                      drive_download.get_filename(curr_file)])
                 if is_excluded_file(relative_pathname):
-                    self._logger.info('Excluding {0}'.format(relative_pathname))
+                    self._logger.debug('Excluding {0}'.format(relative_pathname))
                     continue
                 
                 # determine if the file should be skipped due to modification time
                 abs_pathname = os.path.sep.join( [local_root_folder, relative_pathname] )
                 if not (self._options.ignore_modtime or 
                         self._drive_file_is_newer(curr_file, abs_pathname)):
-                    self._logger.info('Skipping {0} as there has been no change'.format(relative_pathname))
+                    self._logger.debug('Skipping {0} as there has been no change'.format(relative_pathname))
                     continue
                 
+                self._logger.info('Downloading {0}'.format(relative_pathname))
                 drive_download.download_file(curr_file, abs_pathname)
         
 

@@ -24,7 +24,7 @@ class Storage:
         for curr_node in curr_hierarchy.iterkeys():
             curr_path = parent_path + os.path.sep + self._all_folders[curr_node][u'name']
             if not os.path.exists(curr_path):
-                self._logger.info('Creating folder {0}'.format(curr_path))
+                self._logger.debug('Creating folder {0}'.format(curr_path))
                 os.mkdir(curr_path)
             self._create_folder_hierarchy(curr_hierarchy[curr_node], curr_path)
 
@@ -32,6 +32,7 @@ class Storage:
         """
         Erases everything in the storage folder
         """
+        self._logger.debug('Erasing all files in storage')
         if self._dry_run:
             return
         
@@ -50,6 +51,7 @@ class Storage:
         self._hierarchy = folder_hierarchy
 
         if not os.path.exists(self._root_folder):
+            self._logger.debug('Creating root folder {0}'.format(self._root_folder))
             os.mkdir(self._root_folder)
         self._create_folder_hierarchy(self._hierarchy[u'root'], 
                                       self._root_folder)

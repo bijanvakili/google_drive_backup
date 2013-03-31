@@ -1,3 +1,4 @@
+import logging
 from smtplib import SMTP, SMTP_SSL
 from email.mime.text import MIMEText
 
@@ -9,6 +10,7 @@ class EmailNotifier:
     def __init__(self, config):
         self._config = config[u'notifications'][u'email']
         self._config.__dict__.update()
+        self._logger = logging.getLogger('drive_backup.notification') 
     
     def report_error(self, error_msg):
         """
@@ -22,6 +24,7 @@ class EmailNotifier:
             msg['To'] = ', '.join(self._config.recipients)
             
             # use system SMTP configuration if one does not exist
+            self._logger.debug('Connecting to SMTP server')
             smtp_config = self._config.get(u'smtp')
             if not smtp_config:
                 smtp_client = SMTP('localhost')
@@ -37,9 +40,11 @@ class EmailNotifier:
 
                 smtp_login = smtp_config.get('login')
                 if smtp_login:
+                    self._logger.debug('Login to SMTP server')
                     smtp_client.login(smtp_login[u'username'], smtp_login[u'password'])
                     
             # send the email
+            self._logger.debug('Sending notification email')
             smtp_client.sendmail(self._config.get(u'from'), 
                           self._config.recipients, 
                           msg.as_string())
