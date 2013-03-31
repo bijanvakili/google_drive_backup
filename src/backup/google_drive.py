@@ -26,10 +26,10 @@ class GoogleDriveDownload:
         all_folders - list of folder meta information
         folder_hierarchy - dict of dicts describing folder hierarchy (index by 'id')
     """
-    def __init__(self, config, drive_service):
-        self._config = config['backup']
-        self._dry_run = config['dry_run']
+    def __init__(self, config, drive_service, dry_run):
+        self._config = config[u'backup']
         self._drive_service = drive_service
+        self._dry_run = dry_run
         self._logger = logging.getLogger('drive_backup.backup.GoogleDriveDownload')
 
     def iterfolder(self, folder_id):
@@ -41,7 +41,7 @@ class GoogleDriveDownload:
         while keep_downloading:
             current_drive_results = self._get_file_listing_page(
                 "trashed = %s and mimeType != '%s' and '%s' in parents" % 
-                    (self._config['include_trashed'], self._MIME_TYPE_FOLDER, folder_id), 
+                    (self._config[u'include_trashed'], self._MIME_TYPE_FOLDER, folder_id), 
                 page_token)
             page_token = current_drive_results.get('nextPageToken')
             if not page_token:
@@ -67,7 +67,7 @@ class GoogleDriveDownload:
         page_token = None
         while keep_downloading:
             current_drive_results = self._get_file_listing_page("trashed = %s and mimeType = '%s'" % 
-                                (self._config['include_trashed'], self._MIME_TYPE_FOLDER), page_token)
+                                (self._config[u'include_trashed'], self._MIME_TYPE_FOLDER), page_token)
             page_token = current_drive_results.get('nextPageToken')
             
             for item in current_drive_results[u'items']:
@@ -118,7 +118,7 @@ class GoogleDriveDownload:
         """
         Determines the local filename for a file object
         """
-        file_format = self._config['download_formats'][file_obj[u'mimeType']]
+        file_format = self._config[u'download_formats'][file_obj[u'mimeType']]
         return '{0}.{1}'.format(file_obj[u'title'], file_format['extension'])
         
     def download_file(self, file_obj, filename):
@@ -130,7 +130,7 @@ class GoogleDriveDownload:
         """
         
         # prepare the file metadata
-        file_format = self._config['download_formats'][file_obj[u'mimeType']]
+        file_format = self._config[u'download_formats'][file_obj[u'mimeType']]
         modification_time = datetime.strptime(file_obj[u'modifiedDate'],
                                           '%Y-%m-%dT%H:%M:%S.%fZ')
         
