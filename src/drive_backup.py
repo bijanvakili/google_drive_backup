@@ -3,7 +3,6 @@
 """
 Downloads your Google drive for backup
 """
-# TODO email on error
 # TODO handle modification time (or override to download all)
 # TODO logging configuration
 # TODO cron job
@@ -22,9 +21,9 @@ from apiclient.discovery import build
 from auth.credential import CredentialManager
 from backup.google_drive import GoogleDriveDownload 
 from backup.storage import Storage
+from notification import EmailNotifier
 
 DEFAULT_CONFIG_FILE = './etc/config.json'
-OAUTH_SCOPE = 'https://www.googleapis.com/auth/drive'
 
 
 def convert_tree_unicode_to_str(tree):
@@ -52,8 +51,8 @@ def main():
     """
     ... Main Program ...
     """
+    config = None
     try:
-        
         # parse the command line arguments
         parser = argparse.ArgumentParser(description='Download all Google docs')
         parser.add_argument('-c', '--config', dest='configuration_file', action='store', 
@@ -140,6 +139,11 @@ def main():
             logger.error(e)
         else:
             print >>sys.stderr, e
+            
+        if config and 'email' in config['notifications']:
+            notifier = EmailNotifier(config)
+            notifier.report_error(str(e))
+            
         sys.exit(1)
 
 if __name__ == '__main__':

@@ -42,5 +42,29 @@
 		[
 			"readings/*"
 		]
+	},
+	"notifications" :
+	{
+		"email_DISABLED" :
+		{
+			"from" : "root@quadbeast",
+			"subject": "Scheduled Google Drive Backup Notification",
+			"recipients" : 
+			[
+				"bijan.vakili@gmail.com"
+			],
+			"smtp" : 
+			{
+				"type": "ssl",
+				"host" : "smtp.gmail.com",
+				"port" : 587,
+				"timeout" : 30,
+				"login" :
+				{
+					"username" : "bijan.vakili@gmail.com",
+					"password" : "MYPASSWORD"
+				}
+			}
+		}
 	}
 }
