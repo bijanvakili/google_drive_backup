@@ -3,8 +3,12 @@ Runtime dependencies
  python 2.7
  google-api-python-client
 
-This link provides a good sample of how to download all files:
 
-http://code.ohloh.net/file?fid=SK2btm6n9NOjz0W6jvJai6eJrBk&cid=PnTI5zjJDLg&s=SignedJwtAssertionCredentials%20google%20drive&mp=1&ml=1&me=1&md=1&browser=Default#L45
-
- 
+Credits
+=======
+Implemented by: 
+	Bijan Vakili (bijan.vakili@gmail.com)
+	
+Based on gdrive-backup project by:
+	Shaun Martin (shaun@samsite.ca)
+	https://code.google.com/p/gdrive-backup/source/browse/gdrive_backup

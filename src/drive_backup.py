@@ -3,7 +3,6 @@
 """
 Downloads your Google drive for backup
 """
-# TODO try to replace notification module with logging SMTPHandler
 
 import argparse
 import httplib2
@@ -20,7 +19,6 @@ from apiclient.discovery import build
 from auth.credential import CredentialManager
 from backup.google_drive import GoogleDriveDownload 
 from backup.storage import Storage
-from notification import EmailNotifier
 
 class LevelBelowFilter(logging.Filter):
     """
@@ -62,7 +60,7 @@ class MainProgram:
                             help='Path to configuration file (CONFIG)')
         parser.add_argument('--debug', dest='debug', 
                             action='store_true', default=False,
-                            help='Set the logging level')
+                            help='Override logging level to output debug messages')
         parser.add_argument('--remove-creds', dest='remove_credentials', 
                             action='store_true', default=False,
                             help='Remove locally stored credentials (erase command)')
@@ -76,7 +74,13 @@ class MainProgram:
         # load the configuration
         self._load_configuration( self._options.configuration_file )
 
+        
         # set up logging and credential manager
+        # NOTE: this loop is required to ensure credentials for SMTPHandler
+        # are always passed in as a tuple and not a list
+        for handler in self._config[u'logging'][u'handlers'].itervalues():
+            if handler[u'class'] == u'logging.handlers.SMTPHandler':
+                handler[u'credentials'] = tuple(handler[u'credentials'])
         dictConfig(self._config[u'logging'])
         self._logger = logging.getLogger('drive_backup')
         if self._options.debug:
@@ -101,10 +105,6 @@ class MainProgram:
             self._logger.error(error)
         else:
             print >>sys.stderr, error
-            
-        if self._config and u'email' in self._config[u'notifications']:
-            notifier = EmailNotifier(self._config)
-            notifier.report_error(str(error))
         
     def login(self):
         """

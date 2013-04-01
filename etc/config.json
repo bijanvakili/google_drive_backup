@@ -43,30 +43,6 @@
 			"readings/*"
 		]
 	},
-	"notifications" :
-	{
-		"email_DISABLED" :
-		{
-			"from" : "root@quadbeast",
-			"subject": "Scheduled Google Drive Backup Notification",
-			"recipients" : 
-			[
-				"bijan.vakili@gmail.com"
-			],
-			"smtp" : 
-			{
-				"type": "ssl",
-				"host" : "smtp.gmail.com",
-				"port" : 587,
-				"timeout" : 30,
-				"login" :
-				{
-					"username" : "bijan.vakili@gmail.com",
-					"password" : "MYPASSWORD"
-				}
-			}
-		}
-	},
 	"logging" : 
 	{
     	"version": 1,
@@ -119,6 +95,18 @@
 	            "formatter": "level_and_message",
 	            "stream"  : "ext://sys.stderr"
 	        },
+	        "email_stderr" :
+	        {
+	        	"level": "WARNING",
+	        	"class": "logging.handlers.SMTPHandler",
+	        	"formatter": "level_and_message",
+	        	"mailhost" : ["smtp.gmail.com", 587],
+				"fromaddr": "root@quadbeast",
+				"toaddrs" : ["bijan.vakili@gmail.com"],
+	        	"subject": "Google Drive Backup Notification",
+				"credentials" : ["YOUR_NAME", "YOUR_PASSWORD"],
+				"secure": []
+	        },	        
 	        "null": 
 	        {
 	            "level": "DEBUG",
@@ -129,7 +117,7 @@
 		{
 			"drive_backup" :
 			{
-	            "handlers" : [ "file", "console_stdout", "console_stderr" ],
+	            "handlers" : [ "file", "console_stdout", "console_stderr", "email_stderr" ],
 	            "level": "INFO"
 			},
 			"oauth2client.util" :

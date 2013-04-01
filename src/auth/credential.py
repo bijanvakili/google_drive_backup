@@ -17,6 +17,8 @@ class CredentialManager:
     """
     def __init__(self, storage_pathname, dry_run):
         self._store_pathname = storage_pathname
+        if type(self._store_pathname) == unicode:
+            self._store_pathname = self._store_pathname.encode('ascii')
         self._dry_run = dry_run
     
     def load_client_credentials(self, client_id):
