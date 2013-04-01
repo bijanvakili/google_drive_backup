@@ -1,0 +1,3 @@
+
+GOOGLE_DRIVE_BACKUP_HOME=/home/bijanv/FastStorage/Applications/google_drive_backup
+0 */2 * * * $GOOGLE_DRIVE_BACKUP_HOME/bin/drive_backup.sh
