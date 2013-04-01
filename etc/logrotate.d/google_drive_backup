@@ -1,0 +1,7 @@
+# Log rotation configuration for google_drive_backup
+
+"var/log/google_drive_backup.log" {
+	rotate 7
+	daily
+	create 0600 bijanv bijanv
+}

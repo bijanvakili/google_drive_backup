@@ -186,6 +186,8 @@ class MainProgram:
                     continue
                 
                 # determine if the file should be skipped due to modification time
+                if relative_pathname[0] == '/':
+                    relative_pathname = relative_pathname[1:] 
                 abs_pathname = os.path.sep.join( [local_root_folder, relative_pathname] )
                 if not (self._options.ignore_modtime or 
                         self._drive_file_is_newer(curr_file, abs_pathname)):
