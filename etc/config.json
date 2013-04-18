@@ -7,8 +7,8 @@
 		},
 		"account" : 
 		{
-			"client_id" : "528303764723-o89htckqfcbcbuj2qmm6s2d6i1gufd48.apps.googleusercontent.com",
-			"client_secret" : "aDX6763dgqFCT8yloeMuGyO-" 
+			"client_id" : "YOURCLIENTID.apps.googleusercontent.com",
+			"client_secret" : "YOURCLIENTSECRET" 
 		} 
 	},
 	"backup" :
