@@ -137,7 +137,10 @@ class GoogleDriveDownload:
             return
 
         # download the file to the local storage
-        download_url = file_obj[u'exportLinks'][file_format['content_type']]
+        if u'exportLinks' in file_obj:
+            download_url = file_obj[u'exportLinks'][file_format['content_type']]
+        else:
+            download_url = file_obj[u'downloadUrl']
         http_response, content = self._drive_service._http.request(download_url)
         if http_response.status != 200:
             raise DownloadError(http_response.status, content)
