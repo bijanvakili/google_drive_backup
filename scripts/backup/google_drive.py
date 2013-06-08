@@ -116,8 +116,11 @@ class GoogleDriveDownload:
         """
         Determines the local filename for a file object
         """
-        file_format = self._config[u'download_formats'][file_obj[u'mimeType']]
-        return '{0}.{1}'.format(file_obj[u'title'], file_format['extension'])
+        if file_obj[u'mimeType'] in self._config[u'download_formats']:
+            file_format = self._config[u'download_formats'][file_obj[u'mimeType']]
+            return '{0}.{1}'.format(file_obj[u'title'], file_format['extension'])
+        else:
+            return file_obj[u'title']
         
     def download_file(self, file_obj, filename):
         """
@@ -128,7 +131,6 @@ class GoogleDriveDownload:
         """
         
         # prepare the file metadata
-        file_format = self._config[u'download_formats'][file_obj[u'mimeType']]
         modification_time = datetime.strptime(file_obj[u'modifiedDate'],
                                           '%Y-%m-%dT%H:%M:%S.%fZ')
         
@@ -138,6 +140,7 @@ class GoogleDriveDownload:
 
         # download the file to the local storage
         if u'exportLinks' in file_obj:
+            file_format = self._config[u'download_formats'][file_obj[u'mimeType']]
             download_url = file_obj[u'exportLinks'][file_format['content_type']]
         else:
             download_url = file_obj[u'downloadUrl']
