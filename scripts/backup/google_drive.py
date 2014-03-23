@@ -70,9 +70,11 @@ class GoogleDriveDownload:
             
             for item in current_drive_results[u'items']:
                 # NOTE: we only care about the first parent 
-                parent = item['parents'][0]
-                all_folders[ item[u'id'] ] = { u'name' : item[u'title'], 
-                    u'id' : item[u'id'], u'parent' : u'root' if parent[u'isRoot'] else parent[u'id']}
+                parent = item['parents'][0] if len(item['parents']) > 0 else None
+                all_folders[ item[u'id'] ] = { 
+                    u'name' : item[u'title'], 
+                    u'id' : item[u'id'], 
+                    u'parent' : u'root' if parent is None or parent[u'isRoot'] else parent[u'id']}
                 
             if not page_token:
                 keep_downloading = False
